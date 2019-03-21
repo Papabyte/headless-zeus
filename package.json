@@ -1,0 +1,27 @@
+{
+	"name": "headless-zeus",
+	"description": "Obyte Zeus headless wallet",
+	"author": "Obyte",
+	"version": "0.1.9",
+	"main": "start.js",
+	"keywords": [
+		"wallet",
+		"headless",
+		"DAG",
+		"obyte",
+		"byteball",
+		"full node"
+	],
+	"license": "MIT",
+	"repository": {
+		"url": "git://github.com/papabyte/headless-zeus.git",
+		"type": "git"
+	},
+	"bugs": {
+		"url": "https://github.com/papabyte/headless-zeus/issues"
+	},
+	"dependencies": {
+		"ocore": "git+https://github.com/byteball/ocore.git",
+		"aes256": "1.0.4"
+	}
+}
