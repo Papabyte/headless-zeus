@@ -11,7 +11,7 @@ exports.bSingleAddress = true;
 exports.storage = 'sqlite';
 
 
-exports.hub = process.env.testnet ? 'obyte.org/bb-test' : 'obyte.org/bb';
+exports.hub = process.env.testnet ? 'relay.papabyte.com/bb-test' : 'obyte.org/bb';
 exports.deviceName = 'Headless';
 
 

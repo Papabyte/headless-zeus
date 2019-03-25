@@ -21,7 +21,7 @@
 		"url": "https://github.com/papabyte/headless-zeus/issues"
 	},
 	"dependencies": {
-		"ocore": "git+https://github.com/byteball/ocore.git",
-		"aes256": "1.0.4"
+		"aes256": "1.0.4",
+		"ocore": "git+https://github.com/byteball/ocore.git"
 	}
 }
