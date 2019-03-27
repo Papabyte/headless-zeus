@@ -22,7 +22,8 @@ function createPayment(){
 		}
 	});
 	
-	var from_address = "Q56WQ4GE5ECEIMD24QTCABDPZJHABAHJ";
+	var from_address = headlessWallet.getZeusAddress();
+
 	var payee_address = "LS3PUAGJ2CEYBKWPODVV72D3IWWBXNXO";
 	var arrOutputs = [
 		{address: from_address, amount: 0},      // the change
@@ -32,5 +33,3 @@ function createPayment(){
 }
 
 eventBus.on('headless_wallet_ready', createPayment);
-
-["or",["and",[["sig",{"pubkey":"A0i1IBbWd5EYE4BzcfOofSNp2tJgYsC2Fzqrh6c9FOGw"}],["not",["has definition change",["this address","any"]]]],["sig",{"pubkey":"A+I+vBmqlEEfYUVX3T3aROQXm9pyc2CGJBcni8xhoXwj"}]]]
