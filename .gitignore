@@ -43,3 +43,4 @@ processed.txt
 .env
 
 definition_change.js
+package-lock.json
