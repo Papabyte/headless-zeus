@@ -4,11 +4,8 @@ var util = require('util');
 var constants = require('ocore/constants.js');
 var desktopApp = require('ocore/desktop_app.js');
 var appDataDir = desktopApp.getAppDataDir();
-var path = require('path');
 var validationUtils = require("ocore/validation_utils.js");
 var async = require('async');
-
-
 var conf = require('ocore/conf.js');
 var objectHash = require('ocore/object_hash.js');
 var db = require('ocore/db.js');
@@ -17,16 +14,12 @@ var ecdsaSig = require('ocore/signature.js');
 var readline = require('readline');
 var aes256 = require('aes256');
 
-
 var count_files = 0;
 var keys_filename;
-
 var privKey;
 var arrDefinition;
 var signing_path;
 var zeus_address;
-
-
 
 function checkObjFromFile(obj){
 	if (typeof obj.keys_set_properties != "object")
@@ -35,10 +28,13 @@ function checkObjFromFile(obj){
 		throw Error("Error in key file: encrypted_data doesn't exist or is not valid");	
 	if (!validationUtils.isValidAddress(obj.keys_set_properties.address))
 		throw Error("Error in key file: address doesn't exist or is not valid");
-		if (!validationUtils.isValidAddress(obj.keys_set_properties.definition_chash))
+	if (!validationUtils.isValidAddress(obj.keys_set_properties.definition_chash))
 		throw Error("Error in key file: definition_chash doesn't exist or is not valid");
+	if (!validationUtils.isNonemptyString(obj.keys_set_properties.prod_key_signing_path))
+		throw Error("Error in key file: prod_key_signing_path doesn't exist or is not valid");
+	if (!validationUtils.isNonemptyArray(obj.keys_set_properties.arrDefinition))
+		throw Error("Error in key file: arrDefinition doesn't exist or is not valid");
 }
-
 
 //for a new setup, we need to insert the address in my_addresses table and create a dummy wallet due to foreign key constraint.
 //our signer doesn't use my_addresses but ocore requires it to emit event when a transaction happens or to subscribe from vendor if light node
@@ -97,7 +93,6 @@ setTimeout(function(){
 
 		initConfJson(function(){
 			rl.question("Passphrase: ", function(passphrase){
-				var device = require('ocore/device.js');
 				var zeus_data = JSON.parse(data);
 				checkObjFromFile(zeus_data);
 				zeus_address = zeus_data.keys_set_properties.address;
@@ -112,43 +107,39 @@ setTimeout(function(){
 					arrDefinition = zeus_data.keys_set_properties.arrDefinition;
 					signing_path = zeus_data.keys_set_properties.prod_key_signing_path;
 
-						var device = require('ocore/device.js');
-						var network = require('ocore/network.js');
+					var device = require('ocore/device.js');
+					var network = require('ocore/network.js');
 
-						device.setDeviceHub(conf.hub);
+					device.setDeviceHub(conf.hub);
 
-						network.findOutboundPeerOrConnect(conf.WS_PROTOCOL+conf.hub, function onLocatedHubForLogin(err, ws){
-							network.initWitnessesIfNecessary(ws);
-							if (conf.bLight){
-								var light_wallet = require('ocore/light_wallet.js');
-								light_wallet.setLightVendorHost(conf.hub);
-							}
-							setTimeout(function(){
-								var storage = require('ocore/storage.js');
+					network.findOutboundPeerOrConnect(conf.WS_PROTOCOL+conf.hub, function onLocatedHubForLogin(err, ws){
+						if (err)
+							throw Error(err);
+						network.initWitnessesIfNecessary(ws);
+						if (conf.bLight){
+							var light_wallet = require('ocore/light_wallet.js');
+							light_wallet.setLightVendorHost(conf.hub);
+						}
+						setTimeout(function(){
+							var storage = require('ocore/storage.js');
 
-								console.log("WARNING: This node run with a Zeus address primarly intended for oracles and witnesses, features are limited: no device address, no pairing with other device and you can send a transaction only by using the composer.\n Functions in wallet.js and wallet_defined_by_keys.js WON'T work.");
-								console.log("====== chash definition: " + JSON.stringify(arrDefinition));
-								console.log("====== my Zeus address: " + zeus_address);
-								storage.readDefinitionChashByAddress(db, zeus_address, null, function(chash){
+							console.log("WARNING: This node run with a Zeus address primarly intended for oracles and witnesses, features are limited: no device address, no pairing with other device and you can send a transaction only by using the composer. Functions in wallet.js and wallet_defined_by_keys.js WON'T work.");
+							console.log("====== chash definition: " + JSON.stringify(arrDefinition));
+							console.log("====== my Zeus address: " + zeus_address);
+							storage.readDefinitionChashByAddress(db, zeus_address, null, function(chash){
 
-									if (zeus_data.keys_set_properties.definition_chash != chash)
-										throw Error("Error: your key file is not currently valid for this zeus address. chash in file: " + zeus_data.keys_set_properties.definition_chash + " - expected chash: " + chash);
-									eventBus.emit('headless_wallet_ready');
-									replaceConsoleLog();
-								});
+								if (zeus_data.keys_set_properties.definition_chash != chash)
+									throw Error("Error: your key file is not currently valid for this zeus address. chash in file: " + zeus_data.keys_set_properties.definition_chash + " - expected chash: " + chash);
+								eventBus.emit('headless_wallet_ready');
+								replaceConsoleLog();
+							});
 
-							}, 3000); // we let time to sync for light node
-
-						});
-
-	
+						}, 3000); // we let time to sync for light node
+					});
 				});
-
 			});
-
 		});
 	});
-
 }, 1000);
 
 
